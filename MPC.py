@@ -18,7 +18,7 @@ class MPC(object):
                  data_config):
         # argument settings
 
-        self.model_type = 'MPC'
+        self.model_type = 'MPC-co'
         self.adj_type = args.adj_type
         self.n_users = data_config['n_users']
         self.n_items = data_config['n_items']
@@ -49,8 +49,10 @@ class MPC(object):
         self.max_item_cwb = max_item_cwb
         self.max_item_pwc = max_item_pwc
         self.coefficient_loss = eval(args.coefficient_loss)
-        self.coefficient_cart = eval(args.coefficient_cart)
-        self.coefficient_buy = eval(args.coefficient_buy)
+
+        self.coefficient= eval(args.coefficient)
+        self.co = eval(args.co)
+        self.c = eval(args.c)
 
         self.n_relations = 3
 
@@ -93,13 +95,11 @@ class MPC(object):
         self.ua_embeddings332, self.ia_embeddings332 = self._create_neg_embed(self.ua_embeddings3, self.ia_embeddings3,
                                                                                 self.pwc_adj)
 
-        self.ua_embeddingsc = self.coefficient_cart[0] * self.ua_embeddings2 + \
-                              self.coefficient_cart[1] * (self.ua_embeddings23 - self.ua_embeddings332) + \
-                              self.coefficient_cart[2] * self.ua_embeddings23
+        self.ua_embeddingsc = self.ua_embeddings2 + \
+                              self.coefficient[0] * (self.ua_embeddings23 - self.ua_embeddings332) + self.coefficient[1] * self.ua_embeddings23
 
-        self.ia_embeddingsc = self.coefficient_cart[0] * self.ia_embeddings2 + \
-                              self.coefficient_cart[1] * (self.ia_embeddings23 - self.ia_embeddings332) + \
-                              self.coefficient_cart[2] * self.ia_embeddings23
+        self.ia_embeddingsc = self.ia_embeddings2 + \
+                              self.coefficient[0] * (self.ia_embeddings23 - self.ia_embeddings332) + self.coefficient[1] * self.ia_embeddings23
 
         self.ua_embeddings13, self.ia_embeddings13 = self._create_myrec_embed(self.ua_embeddings3, self.ia_embeddings3,
                                                                               self.buy_adj)
@@ -110,17 +110,13 @@ class MPC(object):
         self.ua_embeddings22, self.ia_embeddings22 = self._create_neg_embed(self.ua_embeddingsc, self.ia_embeddingsc,
                                                                               self.cwb_adj)
 
-        self.ua_embeddingsb = self.coefficient_buy[0] * self.ua_embeddings1 + \
-                              self.coefficient_buy[1] * (self.ua_embeddings12 - self.ua_embeddings22) + \
-                              self.coefficient_buy[1] * self.ua_embeddings12 + \
-                              self.coefficient_buy[2] * (self.ua_embeddings13 - self.ua_embeddings33) + \
-                              self.coefficient_buy[2] * self.ua_embeddings13
+        self.ua_embeddingsb = self.ua_embeddings1 + \
+                              self.co[0] * (self.coefficient[0] * (self.ua_embeddings12 - self.ua_embeddings22) + self.coefficient[1] * self.ua_embeddings12) + \
+                              self.co[1] * (self.coefficient[0] * (self.ua_embeddings13 - self.ua_embeddings33) + self.coefficient[1] * self.ua_embeddings13)
 
-        self.ia_embeddingsb = self.coefficient_buy[0] * self.ia_embeddings1 + \
-                              self.coefficient_buy[1] * (self.ia_embeddings12 - self.ia_embeddings22) + \
-                              self.coefficient_buy[1] * self.ia_embeddings12 + \
-                              self.coefficient_buy[2] * (self.ia_embeddings13 - self.ia_embeddings33) + \
-                              self.coefficient_buy[2] * self.ia_embeddings13
+        self.ia_embeddingsb = self.ia_embeddings1 + \
+                              self.co[0] *(self.coefficient[0] * (self.ia_embeddings12 - self.ia_embeddings22) +self.coefficient[1] * self.ia_embeddings12 )+ \
+                              self.co[1] *(self.coefficient[0] * (self.ia_embeddings13 - self.ia_embeddings33) +self.coefficient[1] * self.ia_embeddings13)
 
         self.token_embedding = tf.zeros([1, self.emb_dim], name='token_embedding')
         self.ia_embeddings3 = tf.concat([self.ia_embeddings3, self.token_embedding], axis=0)
@@ -365,8 +361,7 @@ class MPC(object):
 
         loss = self.coefficient_loss[0] * loss1 + self.coefficient_loss[1] * loss2 + self.coefficient_loss[2] * loss3
 
-        regularizer = tf.nn.l2_loss(self.uid) + tf.nn.l2_loss(self.ia_embeddingsb)+\
-                      tf.nn.l2_loss(self.aux_uid_c) + tf.nn.l2_loss(self.ia_embeddingsc)
+        regularizer = tf.nn.l2_loss(self.uid) + tf.nn.l2_loss(self.ia_embeddingsb) 
 
 
         emb_loss = self.decay * regularizer
@@ -687,8 +682,8 @@ if __name__ == '__main__':
     f = open(save_path, 'a')
     f.write('\n')
     f.write(
-        'dataset=%s, embed_size=%d, n_layers_transfer=%d, coefficient_loss=%s, wid=%s, layer_size=%s, '
-        'node_dropout=%s, mess_dropout=%s,decay=%d Ks=%s,\n\t%s\n'
-        % (args.dataset, args.embed_size, args.n_layers_transfer, args.coefficient_loss, args.wid, args.layer_size,
-           args.node_dropout, args.mess_dropout, args.decay, args.Ks, final_perf))
+        'dataset=%s, n_layers_transfer=%d, coefficient_loss=%s, wid=%s, layer_size=%s, '
+        'node_dropout=%s, mess_dropout=%s, decay=%s, coefficient=%s, co=%s, c=%s, Ks=%s,\n\t%s\n'
+        % (args.dataset, args.n_layers_transfer, args.coefficient_loss, args.wid, args.layer_size,
+           args.node_dropout, args.mess_dropout, args.decay, args.coefficient, args.co, args.c, args.Ks, final_perf))
     f.close()

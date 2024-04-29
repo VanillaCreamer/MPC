@@ -64,19 +64,23 @@ def parse_args():
     parser.add_argument('--wid', nargs='?', default='[0.1,0.1,0.1]',
                         help='negative weight, [0.1,0.1,0.1] for beibei, [0.0001,0.0001,0.0001] for taobao')
 
-    parser.add_argument('--decay', type=float, default=0.1,
-                        help='Regularization, 0.1 for beibei, 10 for taobao')
+    parser.add_argument('--decay', type=float, default=1,
+                        help='Regularization, 1 for beibei, 10 for taobao')
                         
 
     parser.add_argument('--coefficient_loss', nargs='?', default='[0/20, 19/20, 1/20]',
                         help='Regularization, [0.0/20, 19/20, 1.0/20] for beibei, [1, 10000, 1] for taobao')
                         
-    parser.add_argument('--coefficient_cart', nargs='?', default='[1, 1, 1]',
-                        help='Regularization, [1, 1, 1] for beibei, [1, 0.1, 0.5] for taobao')
                         
-    parser.add_argument('--coefficient_buy', nargs='?', default='[1, 1, 1, 1, 1]',
-                        help='Regularization, [1, 1, 1, 1, 1] for beibei, [1, 0.2, 0.5, 0.2, 0.5] for taobao')
+    parser.add_argument('--coefficient', nargs='?', default='[0.9, 1]',
+                        help='Regularization, [1, 1] for beibei')
                         
+    parser.add_argument('--co', nargs='?', default='[1.1, 0.9]',
+                        help='Regularization, [1, 1] for beibei')
+    
+    parser.add_argument('--c', nargs='?', default='[1]',
+                        help='Regularization, [1, 1] for beibei')
+
 
     parser.add_argument('--mess_dropout', nargs='?', default='[0.3]',
                         help='Keep probability w.r.t. message dropout, 0.2 for beibei and taobao')

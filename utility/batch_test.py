@@ -13,8 +13,8 @@ Ks = eval(args.Ks)
 data_generator = Data(path=args.data_path + args.dataset, batch_size=args.batch_size)
 USR_NUM, ITEM_NUM = data_generator.n_users, data_generator.n_items
 N_TRAIN, N_TEST = data_generator.n_train, data_generator.n_test
-if args.dataset=='amazon-book':
-    BATCH_SIZE = args.batch_size//4
+if args.dataset=='Taobao':
+    BATCH_SIZE = args.batch_size//8
 else:
     BATCH_SIZE = args.batch_size//2
 
